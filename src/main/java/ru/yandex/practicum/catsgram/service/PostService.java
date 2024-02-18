@@ -7,8 +7,9 @@ import ru.yandex.practicum.catsgram.exception.UserNotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -20,8 +21,31 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> findAll() {
-        return posts;
+    public List<Post> findAll(String sort, Integer from, Integer size) {
+        Comparator<Post> comparator = Comparator.comparing(Post::getCreationDate, (p1, p2) -> p1.compareTo(p2));
+
+        if (sort.equals("desc")) comparator = comparator.reversed();
+
+        posts.sort(comparator);
+
+        // 1-й ВАРИАНТ РЕШЕНИЯ
+
+//        if (from > posts.size()) {
+//            return List.of();
+//        } else {
+//            if (size > posts.size()) {
+//                return posts.subList(from, posts.size());
+//            } else {
+//                return posts.subList(from, posts.size()).subList(0, size);
+//            }
+//        }
+
+        // 2-й ВАРИАНТ РЕШЕНИЯ
+        return posts.stream()
+                .sorted(comparator)
+                .skip(from)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     public Post create(Post post) {

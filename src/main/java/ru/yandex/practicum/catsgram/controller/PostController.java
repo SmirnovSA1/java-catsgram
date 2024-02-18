@@ -6,7 +6,6 @@ import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.service.PostService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class PostController {
@@ -18,8 +17,22 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public List<Post> findAll() {
-        return postService.findAll();
+    public List<Post> findAll(
+            @RequestParam(name = "sort", defaultValue = "desc") String sort,
+            @RequestParam(name = "size", defaultValue = "10") Integer size,
+            @RequestParam(name = "page", defaultValue = "0") Integer page) {
+
+        if (!(sort.equals("desc") || sort.equals("asc"))) {
+            throw new IllegalArgumentException();
+        }
+
+        if (page < 0 || size <= 0) {
+            throw new IllegalArgumentException();
+        }
+
+        Integer from = page * size;
+
+        return postService.findAll(sort, from, size);
     }
 
     @PostMapping(value = "/post")
