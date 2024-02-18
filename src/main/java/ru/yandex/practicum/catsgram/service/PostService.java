@@ -26,10 +26,10 @@ public class PostService {
 
         if (sort.equals("desc")) comparator = comparator.reversed();
 
-        posts.sort(comparator);
-
         // 1-й ВАРИАНТ РЕШЕНИЯ
 
+//        posts.sort(comparator);
+//
 //        if (from > posts.size()) {
 //            return List.of();
 //        } else {
@@ -62,5 +62,17 @@ public class PostService {
                 .filter(post -> post.getId() == postId)
                 .findFirst()
                 .orElseThrow(() -> new PostNotFoundException("Пост " + postId + " не найден"));
+    }
+
+    public List<Post> findAllPostsByFriends(String emailOfFriend, String sort, Integer size) {
+        Comparator<Post> comparator = Comparator.comparing(Post::getCreationDate, (p1, p2) -> p1.compareTo(p2));
+
+        if (sort.equals("desc")) comparator = comparator.reversed();
+
+        return posts.stream()
+                .filter(p -> emailOfFriend.equals(p.getAuthor()))
+                .sorted(comparator)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 }
